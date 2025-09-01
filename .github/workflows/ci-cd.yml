@@ -43,11 +43,11 @@ jobs:
           echo "Waiting for Postgres to be ready..."
           sleep 2
         done
-        psql -U postgres -c 'CREATE DATABASE test_todos;'
+        psql -h localhost -U postgres -c 'CREATE DATABASE test_todos;'
 
     - name: Run tests
       env:
-        TEST_DATABASE_URI: postgresql://postgres:password@localhost:5432/test_todos
+        TEST_DATABASE_URI: postgresql://postgres:password@postgres:5432/test_todos
       run: 
         python -m unittest test_app.py
 
