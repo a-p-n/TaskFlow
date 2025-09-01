@@ -37,7 +37,12 @@ jobs:
         pip install -r requirements.txt
     
     - name: Create test database
+    # Run this command only after Postgres service is up
       run: |
+        until pg_isready -h localhost -p 5432 -U postgres; do
+          echo "Waiting for Postgres to be ready..."
+          sleep 2
+        done
         psql -U postgres -c 'CREATE DATABASE test_todos;'
 
     - name: Run tests
