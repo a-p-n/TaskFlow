@@ -31,6 +31,7 @@ class TestTodoAPI(unittest.TestCase):
             db.drop_all()
 
     def setUp(self):
+        self.app_context = self.__class__.app.app_context()
         # Clear the tasks table before each test
         with self.app.app_context():
             Todo.query.delete()
@@ -38,7 +39,7 @@ class TestTodoAPI(unittest.TestCase):
 
     def test_add_task(self):
         # Test adding a new task
-        response = self.client.post('/api/tasks', data=json.dumps({'text': 'New Task'}), content_type='application/json')
+        response = self.client.post('/api/tasks', json = {'text': 'New Task'}, content_type='application/json')
         self.assertEqual(response.status_code, 201)
         data = json.loads(response.data)
         self.assertEqual(data['text'], 'New Task')
