@@ -43,7 +43,7 @@ jobs:
           echo "Waiting for Postgres to be ready..."
           sleep 2
         done
-        psql -h localhost -U postgres -c 'CREATE DATABASE test_todos;'
+        PGPASSWORD=password psql -h localhost -U postgres -c 'CREATE DATABASE test_todos;'
 
     - name: Run tests
       env:
