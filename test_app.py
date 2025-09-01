@@ -14,9 +14,9 @@ class TestTodoAPI(unittest.TestCase):
         cls.app = app
         cls.client = cls.app.test_client()
 
-        # Use an in-memory SQLite database for testing to avoid
+        # Use an in-memory Postgres database for testing to avoid
         # conflicts with the main database.
-        cls.app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        cls.app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("TEST_DATABASE_URI", 'postgresql://postgres:password@localhost:5432/test_todo_db')
         cls.app.config['TESTING'] = True
 
         # Bind the database and create tables
