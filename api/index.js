@@ -16,9 +16,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, '..', 'public')));
-
-
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
@@ -33,16 +30,16 @@ const authenticateToken = (req, res, next) => {
 };
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'register'));
 });
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'logi.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'login'));
 });
 app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'register'));
 });
 app.get('/tasks', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'index'));
 });
 
 
@@ -164,6 +161,8 @@ app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
         res.status(500).json({ msg: 'Failed to delete task' });
     }
 });
+
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.PORT || 3000;
