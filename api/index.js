@@ -53,7 +53,9 @@ app.post('/api/register', async (req, res) => {
     }
 
     try {
+        console.log("Testing 1");
         const existingUser = await pool.query('SELECT * FROM "User" WHERE username = $1', [username]);
+        console.log("Testing 2");
         if (existingUser.rows.length > 0) {
             return res.status(400).json({ msg: 'Username already exists' });
         }
@@ -65,6 +67,7 @@ app.post('/api/register', async (req, res) => {
         );
         res.status(201).json(newUserResult.rows[0]);
     } catch (error) {
+        console.log(process.env.DATABASE_URL);
         console.error(error);
         res.status(500).json({ msg: 'Server error during registration' });
     }
