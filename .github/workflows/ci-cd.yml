@@ -1,54 +1,25 @@
-name: Test
+name: Docker CI/CD Pipeline
 
 on:
-  push
+  push:
+    branches: [ "main" ]
 
 jobs:
-  build_and_test:
+  build-and-push:
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:13-alpine
-        env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.13'
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    
-    - name: Create test database
-    # Run this command only after Postgres service is up
-      run: |
-        until pg_isready -h localhost -p 5432 -U postgres; do
-          echo "Waiting for Postgres to be ready..."
-          sleep 2
-        done
-        PGPASSWORD=password psql -h localhost -U postgres -c 'CREATE DATABASE test_todos;'
-
-    - name: Run tests
-      env:
-        TEST_DATABASE_URI: postgresql://postgres:password@postgres:5432/test_todos
-      run: 
-        python -m unittest test_app.py
-
-
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/taskflow:latest
