@@ -12,6 +12,7 @@ const pool = new Pool({
 }); 
 
 const app = express();
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use(cors());
 app.use(express.json());
@@ -162,7 +163,6 @@ app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
     }
 });
 
-app.use(express.static(path.join(__dirname, '..', 'public')));
 
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.PORT || 3000;
