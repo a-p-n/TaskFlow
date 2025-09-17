@@ -12,7 +12,6 @@ const pool = new Pool({
 }); 
 
 const app = express();
-app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use(cors());
 app.use(express.json());
@@ -20,9 +19,9 @@ app.use(express.json());
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-
+    
     if (token == null) return res.sendStatus(401);
-
+    
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.sendStatus(403);
         req.user = user;
@@ -31,16 +30,16 @@ const authenticateToken = (req, res, next) => {
 };
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'register'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
 });
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'login'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'login.html'));
 });
 app.get('/register', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'register'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'register.html'));
 });
 app.get('/tasks', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public', 'index'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 
@@ -73,7 +72,7 @@ app.post('/api/register', async (req, res) => {
 
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
-
+    
     try {
         const result = await pool.query('SELECT * FROM "User" WHERE username = $1', [username]);
         const user = result.rows[0];
@@ -81,7 +80,7 @@ app.post('/api/login', async (req, res) => {
         if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
             return res.status(401).json({ msg: 'Incorrect username or password' });
         }
-
+        
         const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
         res.json({ access_token: accessToken });
     } catch (error) {
@@ -130,7 +129,7 @@ app.patch('/api/tasks/:id', authenticateToken, async (req, res) => {
         if (taskResult.rows.length === 0) {
             return res.status(404).json({ msg: 'Task not found or you do not have permission' });
         }
-
+        
         const updatedResult = await pool.query(
             'UPDATE "Todo" SET text = $1, completed = $2 WHERE id = $3 RETURNING *',
             [
@@ -148,7 +147,7 @@ app.patch('/api/tasks/:id', authenticateToken, async (req, res) => {
 
 app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
     const taskId = parseInt(req.params.id, 10);
-
+    
     try {
         const taskResult = await pool.query('SELECT * FROM "Todo" WHERE id = $1 AND "userId" = $2', [taskId, req.user.userId]);
         if (taskResult.rows.length === 0) {
@@ -163,6 +162,7 @@ app.delete('/api/tasks/:id', authenticateToken, async (req, res) => {
     }
 });
 
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.PORT || 3000;
